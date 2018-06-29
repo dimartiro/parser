@@ -9,6 +9,8 @@ main :: IO ()
 main = do
     s <- getLine
     print $ parseGrammar s
+    --print $ parser (alexScanTokens s)
+    --print $ alexScanTokens s
     main
 
 -- Ejemplo gramatica
@@ -17,4 +19,7 @@ main = do
 parseGrammar :: String -> BabbleGrammar
 parseGrammar s =  parser (alexScanTokens s)
 
---parseGrammarFile :: String -> BabbleGrammar
+parseGrammarFile :: String -> IO BabbleGrammar
+parseGrammarFile path = do
+    content <- readFile path
+    return (parseGrammar content)
