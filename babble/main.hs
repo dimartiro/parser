@@ -3,7 +3,8 @@ module Main where
 import Tokens
 import Grammar
 
-import Data.Map
+import qualified Data.Map as Map
+import qualified Data.Maybe as Maybe
 
 main :: IO ()
 main = do
@@ -19,7 +20,21 @@ main = do
 parseGrammar :: String -> BabbleGrammar
 parseGrammar s =  parser (alexScanTokens s)
 
-parseGrammarFile :: String -> IO BabbleGrammar
 parseGrammarFile path = do
     content <- readFile path
     return (parseGrammar content)
+
+data GrammarTree = 
+    GrammarTree {
+        symbol :: Symbol,
+        successors :: [GrammarTree]
+        }
+
+generateGrammarTree bgm = generateTreeNodes (NonTerminal (initial bgm)) bgm
+
+generateTreeNodes :: Symbol -> BabbleGrammar -> GrammarTree
+generateTreeNodes (Terminal symbol) bgm = GrammarTree (Terminal symbol) [] 
+generateTreeNodes (NonTerminal symbol) bgm = GrammarTree (NonTerminal symbol) [generateTreeNodes sym bgm | sym <- symbol_list (pickRandomProduction ((grammar bgm) Map.! symbol))]
+    
+pickRandomProduction :: [Production] -> Production
+pickRandomProduction productions = productions !! 0

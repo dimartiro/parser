@@ -25,11 +25,11 @@ action_1 _ = happyFail
 action_2 (9) = happyShift action_5
 action_2 _ = happyFail
 
-action_3 (10) = happyShift action_4
+action_3 (7) = happyShift action_4
 action_3 (15) = happyAccept
 action_3 _ = happyFail
 
-action_4 (7) = happyShift action_10
+action_4 (9) = happyShift action_10
 action_4 _ = happyFail
 
 action_5 (7) = happyShift action_8
@@ -38,84 +38,77 @@ action_5 (5) = happyGoto action_6
 action_5 (6) = happyGoto action_7
 action_5 _ = happyFail
 
-action_6 (11) = happyShift action_16
-action_6 _ = happyReduce_1
+action_6 (10) = happyShift action_16
+action_6 _ = happyFail
 
-action_7 (7) = happyShift action_13
+action_7 (7) = happyShift action_12
+action_7 (11) = happyShift action_13
 action_7 (12) = happyShift action_14
 action_7 (14) = happyShift action_15
 action_7 _ = happyReduce_3
 
 action_8 _ = happyReduce_8
 
-action_9 (7) = happyShift action_12
-action_9 _ = happyFail
+action_9 _ = happyReduce_7
 
-action_10 (9) = happyShift action_11
+action_10 (7) = happyShift action_8
+action_10 (12) = happyShift action_9
+action_10 (5) = happyGoto action_11
+action_10 (6) = happyGoto action_7
 action_10 _ = happyFail
 
-action_11 (7) = happyShift action_8
-action_11 (12) = happyShift action_9
-action_11 (5) = happyGoto action_21
-action_11 (6) = happyGoto action_7
+action_11 (10) = happyShift action_19
 action_11 _ = happyFail
 
-action_12 (12) = happyShift action_20
-action_12 _ = happyFail
+action_12 _ = happyReduce_9
 
-action_13 _ = happyReduce_9
+action_13 (7) = happyShift action_8
+action_13 (12) = happyShift action_9
+action_13 (5) = happyGoto action_18
+action_13 (6) = happyGoto action_7
+action_13 _ = happyFail
 
-action_14 (7) = happyShift action_19
-action_14 _ = happyFail
+action_14 _ = happyReduce_10
 
-action_15 (8) = happyShift action_18
+action_15 (8) = happyShift action_17
 action_15 _ = happyFail
 
-action_16 (7) = happyShift action_8
-action_16 (12) = happyShift action_9
-action_16 (6) = happyGoto action_17
-action_16 _ = happyFail
+action_16 _ = happyReduce_1
 
-action_17 (7) = happyShift action_13
-action_17 (12) = happyShift action_14
-action_17 (14) = happyShift action_23
-action_17 _ = happyReduce_6
+action_17 (11) = happyShift action_20
+action_17 _ = happyReduce_4
 
-action_18 _ = happyReduce_4
+action_18 _ = happyReduce_6
 
-action_19 (12) = happyShift action_22
-action_19 _ = happyFail
+action_19 _ = happyReduce_2
 
-action_20 _ = happyReduce_7
+action_20 (7) = happyShift action_8
+action_20 (12) = happyShift action_9
+action_20 (5) = happyGoto action_21
+action_20 (6) = happyGoto action_7
+action_20 _ = happyFail
 
-action_21 (11) = happyShift action_16
-action_21 _ = happyReduce_2
+action_21 _ = happyReduce_5
 
-action_22 _ = happyReduce_10
-
-action_23 (8) = happyShift action_24
-action_23 _ = happyFail
-
-action_24 _ = happyReduce_5
-
-happyReduce_1 = happySpecReduce_3  4 happyReduction_1
-happyReduction_1 (HappyAbsSyn5  happy_var_3)
-	_
-	(HappyTerminal (TokenString happy_var_1))
-	 =  HappyAbsSyn4
+happyReduce_1 = happyReduce 4 4 happyReduction_1
+happyReduction_1 (_ `HappyStk`
+	(HappyAbsSyn5  happy_var_3) `HappyStk`
+	_ `HappyStk`
+	(HappyTerminal (TokenString happy_var_1)) `HappyStk`
+	happyRest)
+	 = HappyAbsSyn4
 		 (BabbleGrammar (Map.fromList [(happy_var_1,happy_var_3)]) happy_var_1
-	)
-happyReduction_1 _ _ _  = notHappyAtAll 
+	) `HappyStk` happyRest
 
 happyReduce_2 = happyReduce 5 4 happyReduction_2
-happyReduction_2 ((HappyAbsSyn5  happy_var_5) `HappyStk`
+happyReduction_2 (_ `HappyStk`
+	(HappyAbsSyn5  happy_var_4) `HappyStk`
 	_ `HappyStk`
-	(HappyTerminal (TokenString happy_var_3)) `HappyStk`
-	_ `HappyStk`
+	(HappyTerminal (TokenString happy_var_2)) `HappyStk`
 	(HappyAbsSyn4  happy_var_1) `HappyStk`
 	happyRest)
 	 = HappyAbsSyn4
-		 (BabbleGrammar (Map.insert happy_var_3 (foldr (\x y -> x:y) happy_var_5 (Maybe.fromMaybe [] (Map.lookup happy_var_3 (grammar happy_var_1)))) (grammar happy_var_1)) (initial happy_var_1)
+		 (BabbleGrammar (Map.insert happy_var_2 (foldr (\x y -> x:y) happy_var_4 (Maybe.fromMaybe [] (Map.lookup happy_var_2 (grammar happy_var_1)))) (grammar happy_var_1)) (initial happy_var_1)
 	) `HappyStk` happyRest
 
 happyReduce_3 = happySpecReduce_1  5 happyReduction_3
@@ -135,33 +128,31 @@ happyReduction_4 (HappyTerminal (TokenDigit happy_var_3))
 happyReduction_4 _ _ _  = notHappyAtAll 
 
 happyReduce_5 = happyReduce 5 5 happyReduction_5
-happyReduction_5 ((HappyTerminal (TokenDigit happy_var_5)) `HappyStk`
+happyReduction_5 ((HappyAbsSyn5  happy_var_5) `HappyStk`
 	_ `HappyStk`
-	(HappyAbsSyn6  happy_var_3) `HappyStk`
+	(HappyTerminal (TokenDigit happy_var_3)) `HappyStk`
 	_ `HappyStk`
-	(HappyAbsSyn5  happy_var_1) `HappyStk`
+	(HappyAbsSyn6  happy_var_1) `HappyStk`
 	happyRest)
 	 = HappyAbsSyn5
-		 (( Production happy_var_3 happy_var_5 ) : happy_var_1
+		 (( Production happy_var_1 happy_var_3 ) : happy_var_5
 	) `HappyStk` happyRest
 
 happyReduce_6 = happySpecReduce_3  5 happyReduction_6
-happyReduction_6 (HappyAbsSyn6  happy_var_3)
+happyReduction_6 (HappyAbsSyn5  happy_var_3)
 	_
-	(HappyAbsSyn5  happy_var_1)
+	(HappyAbsSyn6  happy_var_1)
 	 =  HappyAbsSyn5
-		 (( Production happy_var_3 1.0 ) : happy_var_1
+		 (( Production happy_var_1 1.0 ) : happy_var_3
 	)
 happyReduction_6 _ _ _  = notHappyAtAll 
 
-happyReduce_7 = happySpecReduce_3  6 happyReduction_7
-happyReduction_7 _
-	(HappyTerminal (TokenString happy_var_2))
-	_
+happyReduce_7 = happySpecReduce_1  6 happyReduction_7
+happyReduction_7 (HappyTerminal (TokenValueInQuotes happy_var_1))
 	 =  HappyAbsSyn6
-		 ([ Terminal happy_var_2 ]
+		 ([ Terminal happy_var_1 ]
 	)
-happyReduction_7 _ _ _  = notHappyAtAll 
+happyReduction_7 _  = notHappyAtAll 
 
 happyReduce_8 = happySpecReduce_1  6 happyReduction_8
 happyReduction_8 (HappyTerminal (TokenString happy_var_1))
@@ -178,15 +169,13 @@ happyReduction_9 (HappyTerminal (TokenString happy_var_2))
 	)
 happyReduction_9 _ _  = notHappyAtAll 
 
-happyReduce_10 = happyReduce 4 6 happyReduction_10
-happyReduction_10 (_ `HappyStk`
-	(HappyTerminal (TokenString happy_var_3)) `HappyStk`
-	_ `HappyStk`
-	(HappyAbsSyn6  happy_var_1) `HappyStk`
-	happyRest)
-	 = HappyAbsSyn6
-		 (Terminal happy_var_3 :  happy_var_1
-	) `HappyStk` happyRest
+happyReduce_10 = happySpecReduce_2  6 happyReduction_10
+happyReduction_10 (HappyTerminal (TokenValueInQuotes happy_var_2))
+	(HappyAbsSyn6  happy_var_1)
+	 =  HappyAbsSyn6
+		 (Terminal happy_var_2 :  happy_var_1
+	)
+happyReduction_10 _ _  = notHappyAtAll 
 
 happyNewToken action sts stk [] =
 	action 15 15 notHappyAtAll (HappyState action) sts stk []
@@ -199,7 +188,7 @@ happyNewToken action sts stk (tk:tks) =
 	TokenColon -> cont 9;
 	TokenSemiColon -> cont 10;
 	TokenPipe -> cont 11;
-	TokenQuote -> cont 12;
+	TokenValueInQuotes happy_dollar_dollar -> cont 12;
 	TokenUnderscore -> cont 13;
 	TokenProb -> cont 14;
 	_ -> happyError' (tk:tks)
@@ -247,7 +236,10 @@ data Symbol =
     deriving (Eq, Show)
 
 data Production =
-   Production [Symbol] Double
+   Production {
+       symbol_list :: [Symbol],
+       prob :: Double
+   } 
    deriving (Eq, Show)
 
 data BabbleGrammar =
@@ -257,7 +249,13 @@ data BabbleGrammar =
    }
    deriving (Eq, Show)
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
+{-# LINE 1 "templates/GenericTemplate.hs" #-}
+{-# LINE 1 "<built-in>" #-}
+{-# LINE 1 "<command-line>" #-}
+{-# LINE 8 "<command-line>" #-}
+# 1 "/usr/include/stdc-predef.h" 1 3 4
 
+# 17 "/usr/include/stdc-predef.h" 3 4
 
 
 
@@ -300,6 +298,8 @@ data BabbleGrammar =
 
 
 
+{-# LINE 8 "<command-line>" #-}
+{-# LINE 1 "/usr/lib/ghc/include/ghcversion.h" #-}
 
 
 
@@ -317,117 +317,13 @@ data BabbleGrammar =
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+{-# LINE 8 "<command-line>" #-}
+{-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- Id: GenericTemplate.hs,v 1.26 2005/01/14 14:47:22 simonmar Exp 
 
+{-# LINE 13 "templates/GenericTemplate.hs" #-}
+
+{-# LINE 46 "templates/GenericTemplate.hs" #-}
 
 
 
@@ -436,21 +332,11 @@ data BabbleGrammar =
 
 
 
+{-# LINE 67 "templates/GenericTemplate.hs" #-}
 
+{-# LINE 77 "templates/GenericTemplate.hs" #-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+{-# LINE 86 "templates/GenericTemplate.hs" #-}
 
 infixr 9 `HappyStk`
 data HappyStk a = HappyStk a (HappyStk a)
@@ -474,7 +360,7 @@ happyAccept j tk st sts (HappyStk ans _) =
 -----------------------------------------------------------------------------
 -- Arrays only: do the next action
 
-
+{-# LINE 155 "templates/GenericTemplate.hs" #-}
 
 -----------------------------------------------------------------------------
 -- HappyState data type (not arrays)
@@ -568,14 +454,7 @@ happyDropStk n (x `HappyStk` xs) = happyDropStk (n - ((1)::Int)) xs
 -----------------------------------------------------------------------------
 -- Moving to a new state after a reduction
 
-
-
-
-
-
-
-
-
+{-# LINE 256 "templates/GenericTemplate.hs" #-}
 happyGoto action j tk st = action j j tk (HappyState action)
 
 
@@ -634,14 +513,7 @@ happyDontSeq a b = b
 -- of deciding to inline happyGoto everywhere, which increases the size of
 -- the generated parser quite a bit.
 
-
-
-
-
-
-
-
-
+{-# LINE 322 "templates/GenericTemplate.hs" #-}
 {-# NOINLINE happyShift #-}
 {-# NOINLINE happySpecReduce_0 #-}
 {-# NOINLINE happySpecReduce_1 #-}
@@ -653,4 +525,3 @@ happyDontSeq a b = b
 {-# NOINLINE happyFail #-}
 
 -- end of Happy Template.
-

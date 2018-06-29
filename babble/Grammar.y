@@ -45,7 +45,10 @@ data Symbol =
     deriving (Eq, Show)
 
 data Production =
-   Production [Symbol] Double
+   Production {
+       symbol_list :: [Symbol],
+       prob :: Double
+   } 
    deriving (Eq, Show)
 
 data BabbleGrammar =
