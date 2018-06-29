@@ -23,7 +23,7 @@ import qualified Data.Maybe as Maybe
 %% 
 
 Gram : 's' ':' ProductionLine ';'                { BabbleGrammar (Map.fromList [($1,$3)]) $1}
-    | Gram 's' ':' ProductionLine ';'        { BabbleGrammar (Map.insert $2 (foldr (\x y -> x:y) $4 (Maybe.fromMaybe [] (Map.lookup $2 (grammar $1)))) (grammar $1)) (initial $1) }  
+    | Gram 's' ':' ProductionLine ';'           { BabbleGrammar (Map.insert $2 (foldr (\x y -> x:y) $4 (Maybe.fromMaybe [] (Map.lookup $2 (grammar $1)))) (grammar $1)) (initial $1) }  
 
 ProductionLine : Elem                                      { [ Production $1 1.0 ] }
                | Elem '%prob' 'd'                          { [ Production $1 $3 ] }
@@ -32,8 +32,8 @@ ProductionLine : Elem                                      { [ Production $1 1.0
 
 Elem : 'v'                                    { [ Terminal $1 ] }
      | 's'                                      { [ NonTerminal $1 ] }
-     | Elem 's'                                 { NonTerminal $2 :  $1 }
-     | Elem 'v'                               { Terminal $2 :  $1 }
+     | 's' Elem                              { NonTerminal $1 :  $2 }
+     | 'v' Elem                              { Terminal $1 :  $2 }
 
 {
 parseError :: [Token] -> a
