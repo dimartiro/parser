@@ -5,6 +5,10 @@ import Grammar
 
 import qualified Data.Map as Map
 import qualified Data.Maybe as Maybe
+import Data.List
+
+import Data.Foldable (for_)
+
 
 main :: IO ()
 main = do
@@ -23,6 +27,15 @@ parseGrammar s =  parser (alexScanTokens s)
 parseGrammarFile path = do
     content <- readFile path
     return (parseGrammar content)
+
+unparseGrammar (BabbleGrammar grammar initial) = foldr (\e1 e2 -> (unparseGrammarElement (fst e1) (snd e1)) ++ " ; " ++ e2) "" (Map.toList grammar)
+
+unparseGrammarElement :: String -> [Production] -> String
+unparseGrammarElement initial productions = initial ++ ":" ++ (intercalate " | " (map unparseProduction productions))
+
+unparseProduction (Production symbols prob) = (intercalate " " (map unparseSymbol symbols)) ++ " %prob " ++ (show prob)
+unparseSymbol (NonTerminal s) = s
+unparseSymbol (Terminal s) = s
 
 data GrammarTree = 
     GrammarTree {
