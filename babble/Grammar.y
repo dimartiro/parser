@@ -16,14 +16,18 @@ import qualified Data.Maybe as Maybe
     ';'     { TokenSemiColon }
     '|'     { TokenPipe }
     'v'     { TokenValueInQuotes $$ }
-    '_'     { TokenUnderscore }
+    '_'     { TokenUnderscore $$ }
     '%prob' { TokenProb }
     
 %right in
 %% 
 
-Gram : 's' ':' ProductionLine ';'                { BabbleGrammar (Map.fromList [($1,$3)]) $1}
-    | Gram 's' ':' ProductionLine ';'           { BabbleGrammar (Map.insert $2 (foldr (\x y -> x:y) $4 (Maybe.fromMaybe [] (Map.lookup $2 (grammar $1)))) (grammar $1)) (initial $1) }  
+Gram : 's' ':' ProductionLine ';'                { BabbleGrammar (Map.fromList [($1,$3)]) $1 []}
+    | Gram 's' ':' ProductionLine ';'           { BabbleGrammar (Map.insert $2 (foldr (\x y -> x:y) $4 (Maybe.fromMaybe [] (Map.lookup $2 (grammar $1)))) (grammar $1)) (initial $1) []}  
+    | Gram '_' ':' IgnorableLine ';'           { BabbleGrammar (grammar $1) (initial $1) (foldr (\x y -> x:y) $4 (ignorable $1))}  
+
+IgnorableLine : 'v'                        { [ $1 ] }
+                | 'v' '|' IgnorableLine    { $1 : $3 }
 
 ProductionLine : Elem                                      { [ Production $1 1.0 ] }
                | Elem '%prob' 'd'                          { [ Production $1 $3 ] }
@@ -54,7 +58,8 @@ data Production =
 data BabbleGrammar =
    BabbleGrammar {
        grammar :: (Map.Map String [Production]),
-       initial :: String
+       initial :: String,
+       ignorable :: [String]
    }
    deriving (Eq, Show)
 }

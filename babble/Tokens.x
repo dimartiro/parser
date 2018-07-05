@@ -12,7 +12,7 @@ tokens :-
   \:					                                            { \s -> TokenColon }
   \;					                                            { \s -> TokenSemiColon }
   \|					                                            { \s -> TokenPipe }
-  \_					                                            { \s -> TokenUnderscore }
+  \_					                                            { \s -> TokenUnderscore s }
   \"[^\:\;\|\"\_]+\"                              { \s -> TokenValueInQuotes (read s)}
   \%prob                                                  { \s -> TokenProb }
   (0|[1-9]$digit*)(\.$digit+)?([eE][\+\-]?($digit+)?)?	  { \s -> TokenDigit ((read s)::Double) }
@@ -27,7 +27,7 @@ data Token =
   TokenColon |
   TokenSemiColon |
   TokenPipe |
-  TokenUnderscore |
+  TokenUnderscore String |
   TokenValueInQuotes String |
   TokenProb  
 	deriving (Eq,Show)

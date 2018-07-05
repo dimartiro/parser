@@ -21,22 +21,6 @@ main = do
 -- Ejemplo gramatica
 -- Exp : Exp ‘+’ Exp | Exp ‘*’ Exp | ‘(’ Exp ‘)’ | NUM ;
 
-parseGrammar :: String -> BabbleGrammar
-parseGrammar s =  parser (alexScanTokens s)
-
-parseGrammarFile path = do
-    content <- readFile path
-    return (parseGrammar content)
-
-unparseGrammar (BabbleGrammar grammar initial) = foldr (\e1 e2 -> (unparseGrammarElement (fst e1) (snd e1)) ++ " ; " ++ e2) "" (Map.toList grammar)
-
-unparseGrammarElement :: String -> [Production] -> String
-unparseGrammarElement initial productions = initial ++ ":" ++ (intercalate " | " (map unparseProduction productions))
-
-unparseProduction (Production symbols prob) = (intercalate " " (map unparseSymbol symbols)) ++ " %prob " ++ (show prob)
-unparseSymbol (NonTerminal s) = s
-unparseSymbol (Terminal s) = s
-
 data GrammarTree = 
     GrammarTree {
         symbol :: Symbol,
@@ -50,8 +34,22 @@ data Restriction =
     Min Int 
     deriving(Show, Eq);
 
+parseGrammar s =  parser (alexScanTokens s)
 
-generateGrammarTree :: BabbleGrammar -> Restriction -> GrammarTree
+parseGrammarFile path = do
+    content <- readFile path
+    return (parseGrammar content)
+
+unparseGrammar (BabbleGrammar grammar initial ignorables) = foldr (\e1 e2 -> (unparseGrammarElement (fst e1) (snd e1)) ++ " ; " ++ e2) "" (Map.toList grammar)
+
+unparseGrammarElement :: String -> [Production] -> String
+unparseGrammarElement initial productions = initial ++ ":" ++ (intercalate " | " (map unparseProduction productions))
+
+unparseProduction (Production symbols prob) = (intercalate " " (map unparseSymbol symbols)) ++ " %prob " ++ (show prob)
+unparseSymbol (NonTerminal s) = s
+unparseSymbol (Terminal s) = s
+
+generateGrammarTree :: IO BabbleGrammar -> Restriction -> GrammarTree
 generateGrammarTree bgm restriction = generateTreeNodes (NonTerminal (initial bgm)) bgm restriction 0
 
 generateTreeNodes :: Symbol -> BabbleGrammar -> Restriction -> Int -> GrammarTree
