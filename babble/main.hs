@@ -41,9 +41,10 @@ instance Show GrammarNode where
 data Restriction = 
     Unrestricted |
     Max Int |
-    Min Int 
+    Min Int |
+    Redefinition (Map.Map String [Double])
     deriving(Show, Eq);
-
+    
 parseGrammar s =  parser (alexScanTokens s)
 
 parseGrammarFile path = do
@@ -123,9 +124,21 @@ normalizeGrammar prod = [Production (symbol_list x) (prob x/sumPro prod)| x <- p
 sumPro :: [Production] -> Double
 sumPro prod = sum[ prob x| x <- prod]
 
+getNewProductions :: String -> [Production] -> (Map.Map String [Double]) -> [Production]
+getNewProductions key productions prob_map
+    | hasKey = map applyNewProbability (zip productions ((prob_map Map.! key) ++ (repeat 0)))
+    | otherwise = productions
+    where applyNewProbability (original_production, new_prob) = (Production (symbol_list original_production) new_prob)
+          hasKey = Map.member key prob_map
+
+redefineGrammarProbabilities :: BabbleGrammar -> Restriction -> BabbleGrammar
+redefineGrammarProbabilities bgm (Redefinition prob_map) = BabbleGrammar (Map.fromList newGrammarProductions) (initial bgm) (ignorable bgm)
+    where newGrammarProductions = [(key, (getNewProductions key productions prob_map)) | (key, productions) <- (Map.toList (grammar bgm))]
+redefineGrammarProbabilities bgm _ = bgm
+
 -- generateValidStrings: Monad alert, beware
 generateValidStrings bgm restriction = do
   gen <- newStdGen
   let randoms = randomRs (0 :: Double, 1 :: Double) gen
-  let (a, _) = generateGrammarUp bgm restriction randoms
+  let (a, _) = generateGrammarUp (redefineGrammarProbabilities bgm restriction) restriction randoms
   print $ (foldl (\x y -> x ++ (show y)) "" a)
