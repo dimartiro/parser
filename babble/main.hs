@@ -11,6 +11,7 @@ import System.Random (newStdGen, randomRs)
 import Data.Foldable (for_)
 
 
+
 main :: IO ()
 main = do
     s <- getLine
@@ -140,9 +141,20 @@ redefineGrammarProbabilities bgm (Redefinition prob_map) = BabbleGrammar (Map.fr
     where newGrammarProductions = [(key, (getNewProductions key productions prob_map)) | (key, productions) <- (Map.toList (grammar bgm))]
 redefineGrammarProbabilities bgm _ = bgm
 
+addIgnorables :: BabbleGrammar -> (Symbol, Double) -> String
+addIgnorables (BabbleGrammar _ _ []) ((Terminal x), _) = x
+addIgnorables _ ((NonTerminal x), _) = x
+addIgnorables bgm ((Terminal x), y)
+    | exceed_ignorable_prob = x ++ pickRandomIgnorable
+    | otherwise = x
+    where exceed_ignorable_prob = y < prob_threshold
+          pickRandomIgnorable = (ignorable bgm) !! (round ((y/prob_threshold) * fromIntegral ((length (ignorable bgm)) - 1)))
+          prob_threshold = 0.05  
 -- generateValidStrings: Monad alert, beware
 generateValidStrings bgm restriction = do
   gen <- newStdGen
   let randoms = randomRs (0 :: Double, 1 :: Double) gen
   let (a, _) = generateGrammarUp (redefineGrammarProbabilities bgm restriction) restriction randoms
-  print $ (foldl (\x y -> x ++ (show y)) "" a)
+  let grammar_syms = (foldl (\x y -> x ++ [symbol y]) [] a)
+  let grammar_string = map (addIgnorables bgm) (zip grammar_syms randoms)
+  print $ (foldl (\x y -> x ++ y) "" grammar_string)
