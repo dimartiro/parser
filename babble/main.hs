@@ -109,7 +109,7 @@ possibleNodes bgm sym _ _ = [Production [sym] 1]
 -----------------------------------------------------------------------------------
 
 pickRandomProduction :: Double -> [Production] -> Production
-pickRandomProduction rnum prod = pickProduction rnum (normalizeGrammar prod)
+pickRandomProduction rnum prod = pickProduction rnum (normalizeProductions prod)
 
 pickProduction :: Double -> [Production] -> Production
 pickProduction rnum (xs:prod)
@@ -118,8 +118,12 @@ pickProduction rnum (xs:prod)
     | otherwise = xs
 
  
-normalizeGrammar :: [Production] -> [Production]
-normalizeGrammar prod = [Production (symbol_list x) (prob x/sumPro prod)| x <- prod]
+normalizeGrammar :: BabbleGrammar -> BabbleGrammar
+normalizeGrammar bgm = BabbleGrammar (Map.fromList newGrammarProductions) (initial bgm) (ignorable bgm)
+    where newGrammarProductions = [(key, (normalizeProductions productions)) | (key, productions) <- Map.toList (grammar bgm)]
+
+normalizeProductions :: [Production] -> [Production]
+normalizeProductions prod = [Production (symbol_list x) (prob x/sumPro prod)| x <- prod]
 
 sumPro :: [Production] -> Double
 sumPro prod = sum[ prob x| x <- prod]
