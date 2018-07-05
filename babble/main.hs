@@ -7,6 +7,7 @@ import qualified Data.Map as Map
 import qualified Data.Maybe as Maybe
 import Data.List
 
+import System.Random (newStdGen, randomRs)
 import Data.Foldable (for_)
 
 
@@ -21,12 +22,21 @@ main = do
 -- Ejemplo gramatica
 -- Exp : Exp ‘+’ Exp | Exp ‘*’ Exp | ‘(’ Exp ‘)’ | NUM ;
 
-data GrammarTree = 
-    GrammarTree {
+data GrammarNode = 
+    GrammarParentNode {
+        symbol :: Symbol
+    } |
+    GrammarChildNode {
         symbol :: Symbol,
-        successors :: [GrammarTree]
-        }
-        deriving(Show, Eq);
+        parent :: GrammarNode
+    }
+    deriving(Eq);
+
+instance Show GrammarNode where
+    show (GrammarParentNode (NonTerminal t)) = t
+    show (GrammarParentNode (Terminal t)) = t
+    show (GrammarChildNode (NonTerminal t) _) = t
+    show (GrammarChildNode (Terminal t) _) = t
 
 data Restriction = 
     Unrestricted |
@@ -49,25 +59,40 @@ unparseProduction (Production symbols prob) = (intercalate " " (map unparseSymbo
 unparseSymbol (NonTerminal s) = s
 unparseSymbol (Terminal s) = s
 
-generateGrammarTree :: IO BabbleGrammar -> Restriction -> GrammarTree
-generateGrammarTree bgm restriction = generateTreeNodes (NonTerminal (initial bgm)) bgm restriction 0
+-- Generate GrammarNode tree
+generateGrammarUp :: BabbleGrammar -> Restriction -> [Double] -> ([GrammarNode], [Double])
+generateGrammarUp bgm restriction nums = generateNodeUp bgm [GrammarParentNode (NonTerminal (initial bgm))] restriction 0 nums
 
-generateTreeNodes :: Symbol -> BabbleGrammar -> Restriction -> Int -> GrammarTree
-generateTreeNodes (Terminal symbol) bgm restriction height = GrammarTree (Terminal symbol) [] 
-generateTreeNodes (NonTerminal symbol) bgm restriction height = GrammarTree (NonTerminal symbol) [generateTreeNodes sym bgm restriction (height+1) | sym <- symbol_list (pickRandomProduction (possibleNodes bgm symbol restriction height))]
-    
-possibleNodes :: BabbleGrammar -> String -> Restriction -> Int -> [Production]
+generateNodeUp :: BabbleGrammar -> [GrammarNode] -> Restriction -> Int -> [Double] -> ([GrammarNode], [Double])
+generateNodeUp bgm gnodes restriction height numbers
+    | isTerminalTree = (gnodes, numbers)
+    | otherwise = generateNodeUp bgm (foldl (\x y -> x ++ y) [] nextNodes) restriction (height+1) nextNumbers
+    where isTerminalTree = all isTerminal [symbol node | node <- gnodes]
+          nextNodes = map (\(node, number) -> getNextNodes bgm node number restriction height) (zip gnodes numbers)
+          nextNumbers = drop (length gnodes) numbers
+
+getNextNodes :: BabbleGrammar -> GrammarNode -> Double -> Restriction -> Int -> [GrammarNode] 
+getNextNodes bgm node number restriction height = [GrammarChildNode sym node | sym <- symbol_list (pickRandomProduction number (possibleNodes bgm (symbol node) restriction height))]
+
+isTerminalNode :: GrammarNode -> Bool
+isTerminalNode (GrammarChildNode s _) = isTerminal s
+isTerminalNode (GrammarParentNode s) = isTerminal s
+
+isTerminal :: Symbol -> Bool
+isTerminal (Terminal _) = True
+isTerminal _ = False
+
+-- Possible Nodes selection ------------------------------------------------------
+possibleNodes :: BabbleGrammar -> Symbol -> Restriction -> Int -> [Production]
 -- Try to return only terminals if height gte max
-possibleNodes bgm symbol (Max max) height
+possibleNodes bgm (NonTerminal symbol) (Max max) height
     | (height >= max) && (not (null terminal_list)) = terminal_list
     | otherwise = (grammar bgm) Map.! symbol
     where terminal_list = filter isAllTerminal ((grammar bgm) Map.! symbol)
           isAllTerminal production = all isTerminal (symbol_list production) 
-          isTerminal (Terminal _) = True
-          isTerminal _ = False
 
 -- Try to return only non terminals if height lt min
-possibleNodes bgm symbol (Min min) height
+possibleNodes bgm (NonTerminal symbol) (Min min) height
     | (height < min) && (not (null non_terminal_list)) = non_terminal_list
     | otherwise = (grammar bgm) Map.! symbol
     where non_terminal_list = filter isAnyNonTerminal ((grammar bgm) Map.! symbol)
@@ -76,7 +101,31 @@ possibleNodes bgm symbol (Min min) height
           isNonTerminal _ = False
 
 -- Return everything
-possibleNodes bgm symbol _ _ = ((grammar bgm) Map.! symbol)
+possibleNodes bgm (NonTerminal symbol) _ _ = ((grammar bgm) Map.! symbol)
 
-pickRandomProduction :: [Production] -> Production
-pickRandomProduction productions = productions !! 0
+-- Just in case
+possibleNodes bgm sym _ _ = [Production [sym] 1]
+-----------------------------------------------------------------------------------
+
+pickRandomProduction :: Double -> [Production] -> Production
+pickRandomProduction rnum prod = pickProduction rnum (normalizeGrammar prod)
+
+pickProduction :: Double -> [Production] -> Production
+pickProduction rnum (xs:prod)
+    | rnum <= (prob xs) = xs
+    | length prod > 0 = pickProduction (rnum - prob xs) prod
+    | otherwise = xs
+
+ 
+normalizeGrammar :: [Production] -> [Production]
+normalizeGrammar prod = [Production (symbol_list x) (prob x/sumPro prod)| x <- prod]
+
+sumPro :: [Production] -> Double
+sumPro prod = sum[ prob x| x <- prod]
+
+-- generateValidStrings: Monad alert, beware
+generateValidStrings bgm restriction = do
+  gen <- newStdGen
+  let randoms = randomRs (0 :: Double, 1 :: Double) gen
+  let (a, _) = generateGrammarUp bgm restriction randoms
+  print $ (foldl (\x y -> x ++ (show y)) "" a)
