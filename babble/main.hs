@@ -23,6 +23,11 @@ main = do
 -- Ejemplo gramatica
 -- Exp : Exp ‘+’ Exp | Exp ‘*’ Exp | ‘(’ Exp ‘)’ | NUM ;
 
+
+-- Gramaticas utiles
+g1 = parseGrammar "Exp : Exp \"+\" Exp | Exp \"*\" Exp | \"(\" Exp \")\" | NUM ; NUM : \"0\" | \"1\" | \"2\" | \"5\" | \"10\" | \"100\" | \"1000\" ; _ : \" \" | \"\\n\" | \"\\t\" ;"
+g2 = parseGrammar "Exp : \"a\" | Exp \"+\" Exp;"
+
 data GrammarNode = 
     GrammarParentNode {
         symbol :: Symbol
